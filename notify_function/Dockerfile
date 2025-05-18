@@ -5,6 +5,7 @@ COPY pyproject.toml ./
 RUN pip install uv && uv pip install --all-extras .
 
 COPY . .
+COPY .streamlit /root/.streamlit
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/service-account.json
 EXPOSE 8080
 CMD ["streamlit", "run", "main.py", "--server.port", "8080", "--server.address", "0.0.0.0"]
