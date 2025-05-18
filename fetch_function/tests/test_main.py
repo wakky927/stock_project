@@ -3,7 +3,7 @@ import pandas as pd
 from fetch_function import main as fetch_app
 
 @patch("fetch_function.main.bigquery.Client")
-def test_save_to_bigquery(mock_bq):
+def test_save(mock_bq):
     mock_client = MagicMock()
     mock_bq.return_value = mock_client
     mock_client.load_table_from_dataframe.return_value.result.return_value = None

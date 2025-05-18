@@ -1,6 +1,6 @@
 [project]
 name = "fetch_function"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
     "pandas",
     "yfinance",
@@ -10,11 +10,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = [
-    "pytest",
-    "flake8",
-    "pytest-mock"
-]
+dev = ["pytest", "flake8", "pytest-mock"]
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["fetch_function"]
