@@ -2,13 +2,16 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# 先に全体をコピー（uvが依存するモジュールを含めるため）
+# pyproject.toml + 全体構造を一緒にコピー
 COPY . .
 
-# uvインストール & 依存パッケージ解決（extrasも含む）
+# カレントディレクトリをモジュールパスとしてインストール対象にする
+WORKDIR /app/notify_function
+
+# uv で依存を解決（extras も）
 RUN pip install uv && uv pip install --all-extras .
 
-# 環境変数やポート、起動コマンド
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/service-account.json
 EXPOSE 8080
+
 CMD ["streamlit", "run", "main.py", "--server.port", "8080", "--server.address", "0.0.0.0"]
