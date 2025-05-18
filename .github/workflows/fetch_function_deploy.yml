@@ -1,0 +1,35 @@
+name: fetch_function_deploy
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "fetch_function/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: fetch_function
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          token_format: access_token
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: fetch-function
+          region: asia-northeast1
+          source: ./
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          env_vars: |
+            TABLE_ID=${{ secrets.FETCH_TABLE_ID }}

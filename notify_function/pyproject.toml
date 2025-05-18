@@ -1,0 +1,15 @@
+[project]
+name = "notify_function"
+version = "0.3.0"
+dependencies = [
+    "pandas",
+    "google-cloud-bigquery",
+    "streamlit",
+    "line-bot-sdk"
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "flake8", "pytest-mock"]
+
+[tool.setuptools.packages.find]
+where = ["."]

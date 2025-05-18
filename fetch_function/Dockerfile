@@ -1,0 +1,10 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+COPY pyproject.toml ./
+RUN pip install uv && uv pip install --all-extras .
+
+COPY . .
+ENV GOOGLE_APPLICATION_CREDENTIALS=/app/service-account.json
+EXPOSE 8080
+CMD ["streamlit", "run", "main.py", "--server.port", "8080", "--server.address", "0.0.0.0"]

@@ -1,0 +1,26 @@
+name: notify_function_check
+
+on:
+  pull_request:
+    paths:
+      - "notify_function/**"
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: notify_function
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv & dependencies
+        run: |
+          pip install uv
+          uv pip install --all-extras .
+
+      - name: Lint
+        run: flake8 .
+
+      - name: Test
+        run: pytest tests/

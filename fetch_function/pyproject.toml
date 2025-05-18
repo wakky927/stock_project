@@ -1,0 +1,20 @@
+[project]
+name = "fetch_function"
+version = "0.2.0"
+dependencies = [
+    "pandas",
+    "yfinance",
+    "openpyxl",
+    "google-cloud-bigquery",
+    "streamlit"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "flake8",
+    "pytest-mock"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
