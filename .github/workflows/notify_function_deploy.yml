@@ -1,36 +1,48 @@
-name: notify_function_deploy
+name: Deploy Notify Function (Docker)
 
 on:
   push:
-    branches: [ main ]
     paths:
-      - "notify_function/**"
+      - 'notify_function/**'
+      - '.github/workflows/notify_deploy.yml'
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: notify_function
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
     steps:
-      - uses: actions/checkout@v4
+    - name: Checkout source
+      uses: actions/checkout@v4
 
-      - name: Authenticate
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-          token_format: access_token
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-      - name: Set up gcloud
-        uses: google-github-actions/setup-gcloud@v2
+    - name: Configure gcloud
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      - name: Deploy to Cloud Run
-        uses: google-github-actions/deploy-cloudrun@v2
-        with:
-          service: notify-function
-          region: asia-northeast1
-          source: ./
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          env_vars: |
-            TABLE_ID=${{ secrets.FETCH_TABLE_ID }}
-            LINE_TOKEN=${{ secrets.NOTIFY_LINE_TOKEN }}
+    - name: Build Docker image
+      run: |
+        docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/notify-function ./notify_function
+
+    - name: Push to Artifact Registry
+      run: |
+        gcloud auth configure-docker
+        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/notify-function
+
+    - name: Deploy to Cloud Run
+      run: |
+        gcloud run deploy notify-function \
+          --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/notify-function \
+          --platform managed \
+          --region asia-northeast1 \
+          --project ${{ secrets.GCP_PROJECT_ID }} \
+          --update-env-vars TABLE_ID=${{ secrets.FETCH_TABLE_ID }},LINE_CHANNEL_ACCESS_TOKEN=${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }},LINE_USER_ID=${{ secrets.LINE_USER_ID }} \
+          --allow-unauthenticated=false
