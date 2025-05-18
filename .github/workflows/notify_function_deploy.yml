@@ -34,3 +34,4 @@ jobs:
           env_vars: |
             TABLE_ID=${{ secrets.FETCH_TABLE_ID }}
             LINE_TOKEN=${{ secrets.NOTIFY_LINE_TOKEN }}
+          flags: --verbosity=debug

@@ -33,3 +33,4 @@ jobs:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           env_vars: |
             TABLE_ID=${{ secrets.FETCH_TABLE_ID }}
+          flags: --verbosity=debug
