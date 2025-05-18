@@ -1,11 +1,11 @@
-name: Deploy Notify Function (Docker)
+name: Deploy Notify Function to Cloud Run
 
 on:
   push:
     paths:
       - 'notify_function/**'
-      - '.github/workflows/notify_deploy.yml'
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -15,35 +15,28 @@ jobs:
       id-token: 'write'
 
     steps:
-    - name: Checkout source
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
-      with:
-        credentials_json: '${{ secrets.GCP_SA_KEY }}'
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-    - name: Set up gcloud
-      uses: google-github-actions/setup-gcloud@v2
-      with:
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: Set up Docker configuration
+        run: |
+          gcloud auth configure-docker asia-northeast1-docker.pkg.dev
 
-    - name: Configure Docker for Artifact Registry
-      run: gcloud auth configure-docker
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/notify-function/notify-function ./notify_function
+          docker push asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/notify-function/notify-function
 
-    - name: Build Docker image
-      run: |
-        docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/notify-function ./notify_function
-
-    - name: Push image to Artifact Registry
-      run: |
-        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/notify-function
-
-    - name: Deploy to Cloud Run
-      run: |
-        gcloud run deploy notify-function \
-          --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/notify-function \
-          --platform managed \
-          --region asia-northeast1 \
-          --project ${{ secrets.GCP_PROJECT_ID }} \
-          --update-env-vars TABLE_ID=${_
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy notify-function \
+            --image=asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/notify-function/notify-function \
+            --platform=managed \
+            --region=asia-northeast1 \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --set-env-vars=TABLE_ID=${{ secrets.FETCH_TABLE_ID }},LINE_TOKEN=${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}

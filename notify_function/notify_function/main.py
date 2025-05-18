@@ -55,5 +55,3 @@ if st.button("Send Notification Now"):
 else:
     st.info("Auto-run executed on container start or click button.")
     run_notify()
-
-# ✅ Triggered by CI/CD test push
