@@ -23,18 +23,20 @@ jobs:
       with:
         credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-    - name: Configure gcloud
+    - name: Set up gcloud
       uses: google-github-actions/setup-gcloud@v2
       with:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+    - name: Configure Docker for Artifact Registry
+      run: gcloud auth configure-docker
 
     - name: Build Docker image
       run: |
         docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/notify-function ./notify_function
 
-    - name: Push to Artifact Registry
+    - name: Push image to Artifact Registry
       run: |
-        gcloud auth configure-docker
         docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/notify-function
 
     - name: Deploy to Cloud Run
@@ -44,5 +46,4 @@ jobs:
           --platform managed \
           --region asia-northeast1 \
           --project ${{ secrets.GCP_PROJECT_ID }} \
-          --update-env-vars TABLE_ID=${{ secrets.FETCH_TABLE_ID }},LINE_CHANNEL_ACCESS_TOKEN=${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }},LINE_USER_ID=${{ secrets.LINE_USER_ID }} \
-          --allow-unauthenticated=false
+          --update-env-vars TABLE_ID=${_

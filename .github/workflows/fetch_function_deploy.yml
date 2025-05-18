@@ -23,18 +23,20 @@ jobs:
       with:
         credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-    - name: Configure gcloud
+    - name: Set up gcloud
       uses: google-github-actions/setup-gcloud@v2
       with:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+    - name: Configure Docker for Artifact Registry
+      run: gcloud auth configure-docker
 
     - name: Build Docker image
       run: |
         docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/fetch-function ./fetch_function
 
-    - name: Push to Artifact Registry
+    - name: Push image to Artifact Registry
       run: |
-        gcloud auth configure-docker
         docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/fetch-function
 
     - name: Deploy to Cloud Run
